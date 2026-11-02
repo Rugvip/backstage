@@ -22,7 +22,6 @@ import {
   type AnalyticsApi,
   type AppHistoryApi,
   type AppNavigateOptions,
-  type AppLocation,
   type RouteResolutionApi,
   type ConfigApi,
   type DiscoveryApi,
@@ -851,16 +850,10 @@ export namespace mockApis {
           }
         },
       ) as unknown as jest.MockedFunction<AppHistoryApi['navigate']>;
-      let pinnedLocation: AppLocation | undefined;
 
       return createApiMock(appHistoryApiRef, () => ({
-        get location() {
-          return pinnedLocation ?? instance.location;
-        },
-        set location(value: AppLocation) {
-          pinnedLocation = value;
-        },
-        location$: instance.location$,
+        getSnapshot: jest.fn(instance.getSnapshot),
+        subscribe: jest.fn(instance.subscribe),
         navigate: navigateMock,
         createHref: jest.fn(
           (...args: Parameters<AppHistoryApi['createHref']>) =>

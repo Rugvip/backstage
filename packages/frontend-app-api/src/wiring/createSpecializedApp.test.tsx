@@ -1073,13 +1073,13 @@ describe('createSpecializedApp', () => {
       expect(attached).toHaveLength(1);
 
       const pathnames = new Array<string>();
-      const subscription = appHistory.location$.subscribe(location =>
-        pathnames.push(location.pathname),
+      const subscription = appHistory.subscribe(() =>
+        pathnames.push(appHistory.getSnapshot().location.pathname),
       );
 
       window.history.pushState(null, '', '/before-dispose');
       window.dispatchEvent(new PopStateEvent('popstate'));
-      expect(pathnames).toEqual(['/', '/before-dispose']);
+      expect(pathnames).toEqual(['/before-dispose']);
 
       dispose!();
 
@@ -1094,9 +1094,9 @@ describe('createSpecializedApp', () => {
 
       window.history.pushState(null, '', '/after-dispose');
       window.dispatchEvent(new PopStateEvent('popstate'));
-      expect(pathnames).toEqual(['/', '/before-dispose']);
+      expect(pathnames).toEqual(['/before-dispose']);
 
-      subscription.unsubscribe();
+      subscription();
     });
 
     it('should leave an overridden app history API untouched', () => {

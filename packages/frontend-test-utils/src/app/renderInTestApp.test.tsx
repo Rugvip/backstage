@@ -61,17 +61,9 @@ import { AnalyticsImplementationBlueprint } from '@backstage/plugin-app-react';
  */
 function PathProbe() {
   const appHistory = useApi(appHistoryApiRef);
-  const location = useSyncExternalStore(
-    useCallback(
-      onStoreChange => {
-        const subscription = appHistory.location$.subscribe(() =>
-          onStoreChange(),
-        );
-        return () => subscription.unsubscribe();
-      },
-      [appHistory],
-    ),
-    () => appHistory.location,
+  const { location } = useSyncExternalStore(
+    appHistory.subscribe,
+    appHistory.getSnapshot,
   );
   return <span>Path: {location.pathname}</span>;
 }
@@ -287,7 +279,7 @@ describe('renderInTestApp', () => {
     });
 
     expect(screen.getByText('Path: /second-page')).toBeInTheDocument();
-    expect(appHistory.location.pathname).toBe('/second-page');
+    expect(appHistory.getSnapshot().location.pathname).toBe('/second-page');
   });
 
   it('should support API overrides via options', async () => {
@@ -427,7 +419,9 @@ describe('renderInTestApp', () => {
     expect(screen.getByText('Path: /start')).toBeInTheDocument();
 
     const locations: string[] = [];
-    appHistory.location$.subscribe(loc => locations.push(loc.pathname));
+    appHistory.subscribe(() =>
+      locations.push(appHistory.getSnapshot().location.pathname),
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Go next' }));
 
@@ -549,7 +543,7 @@ describe('renderInTestApp', () => {
         '/next',
       );
       await act(async () => screen.getByRole('link', { name: 'Next' }).click());
-      expect(appHistory.location.pathname).toBe('/next');
+      expect(appHistory.getSnapshot().location.pathname).toBe('/next');
       expect(screen.getByText('Location: /next')).toBeInTheDocument();
     });
 
@@ -642,7 +636,7 @@ describe('renderInTestApp', () => {
       initialRouteEntries: ['/start'],
     });
 
-    expect(appHistory.location.pathname).toBe('/start');
+    expect(appHistory.getSnapshot().location.pathname).toBe('/start');
     expect(appHistory.createHref('/catalog?q=1')).toBe('/catalog?q=1');
 
     act(() => {
@@ -650,6 +644,6 @@ describe('renderInTestApp', () => {
     });
 
     expect(await screen.findByText('Path: /elsewhere')).toBeInTheDocument();
-    expect(appHistory.location.pathname).toBe('/elsewhere');
+    expect(appHistory.getSnapshot().location.pathname).toBe('/elsewhere');
   });
 });

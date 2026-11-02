@@ -125,14 +125,14 @@ describe('prepareSpecializedApp', () => {
       expect(attached).toHaveLength(1);
 
       const pathnames = new Array<string>();
-      const subscription = appHistory.location$.subscribe(location =>
-        pathnames.push(location.pathname),
+      const subscription = appHistory.subscribe(() =>
+        pathnames.push(appHistory.getSnapshot().location.pathname),
       );
 
       window.history.pushState(null, '', '/before-dispose');
       window.dispatchEvent(new PopStateEvent('popstate'));
 
-      expect(pathnames).toEqual(['/', '/before-dispose']);
+      expect(pathnames).toEqual(['/before-dispose']);
 
       dispose!();
 
@@ -144,13 +144,13 @@ describe('prepareSpecializedApp', () => {
       window.history.pushState(null, '', '/after-dispose');
       window.dispatchEvent(new PopStateEvent('popstate'));
 
-      expect(pathnames).toEqual(['/', '/before-dispose']);
+      expect(pathnames).toEqual(['/before-dispose']);
 
       // Disposing again is a no-op rather than an error, and never re-attaches
       expect(() => dispose!()).not.toThrow();
       expect(popstateListeners(addEventListenerSpy)).toHaveLength(1);
 
-      subscription.unsubscribe();
+      subscription();
     });
 
     it('should leave an overridden app history API untouched', () => {
