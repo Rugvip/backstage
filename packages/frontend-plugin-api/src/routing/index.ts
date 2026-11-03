@@ -29,7 +29,6 @@ export type { AppHistoryApi } from './AppHistoryApi';
 export { appHistoryApiRef } from './AppHistoryApi';
 export { useAppNavigate } from './useAppNavigate';
 export { useAppHref } from './useAppHref';
-export { RouteLink, type RouteLinkProps } from './RouteLink';
 
 export { useAppLocation } from './useAppLocation';
 export {
